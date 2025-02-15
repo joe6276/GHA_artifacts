@@ -19,6 +19,8 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      js_file: ${{steps.publish.outputs.js_file}} # assigning the value from the output of the step
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -26,6 +28,11 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
+      
+      - name: Publish File
+        id: publish
+        run: echo "js_file=$(find dist/assets/*.js -type f | head -n 1)" >>$GITHUB_OUTPUT # setting the value, persistence
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -47,7 +54,7 @@ jobs:
         with:
           name: dist-files
       - name: Output Content
-        run: ls
+        run: echo "${{needs.build.outputs.js_file}}"
 
       - name: Deploy
         run: echo "Deploying..."
