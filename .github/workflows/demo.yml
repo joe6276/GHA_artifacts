@@ -38,7 +38,7 @@ jobs:
       - name: Build website
         run: npm run build
       - name: Publich File
-        run: find dist/assets/*.js -type f -execdir echo '::set-output name=script-file::{}' ';'
+        run: find dist/assets/*.js -type f -execdir echo '{script-file}={}' ';'
       - name: Upload Artifaacts
         id: publish
         uses: actions/upload-artifact@v4
