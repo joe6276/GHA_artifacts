@@ -9,6 +9,15 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+
+      # Check out cache if its there use cache else run npm install
+      # incase we update package-lock.json reapply the cache
+      - name: Cached Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm 
+          key: deps-${{hashFiles('package.lock.json')}}
+
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -21,9 +30,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       js_file: ${{steps.publish.outputs.js_file}} # assigning the value from the output of the step
+
     steps:
       - name: Get code
         uses: actions/checkout@v3
+      
+      - name: Cached Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm 
+          key: deps-${{hashFiles('package.lock.json')}}
+          
       - name: Install dependencies
         run: npm ci
       - name: Build website
