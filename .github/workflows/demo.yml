@@ -3,61 +3,49 @@ on:
   push:
     branches:
       - master
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Get code
         uses: actions/checkout@v3
-
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
           path: ~/.npm
           key: deps-${{ hashFiles('package-lock.json')}}
-
       - name: Install dependencies
         run: npm ci
-
       - name: Lint code
         run: npm run lint
-
       - name: Test code
         run: npm run test
-
   build:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      script-file: ${{ steps.publish.outputs.script-file }}  # ✅ Corrected
-
+      script-file: ${{ steps.publish.outputs.script-file }}
     steps:
       - name: Get code
         uses: actions/checkout@v3
-
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
           path: ~/.npm
           key: deps-${{ hashFiles('package-lock.json')}}
-
       - name: Install dependencies
         run: npm ci
-
       - name: Build website
         run: npm run build
-
-      - name: Publish File
+      - name: Publich File
         id: publish
-        run: echo "script-file=$(find dist/assets/*.js -type f | head -n 1)" >> $GITHUB_OUTPUT  # ✅ Fixed output
-
-      - name: Upload Artifacts
+        run: find dist/assets/*.js -type f -execdir echo '{script-file}={}' ';' >> $GITHUB_OUTPUT
+      - name: Upload Artifaacts
+        
         uses: actions/upload-artifact@v4
         with:
           name: dist-files
           path: dist
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -68,7 +56,7 @@ jobs:
           name: dist-files
 
       - name: Output Files
-        run: echo "${{ needs.build.outputs.script-file }}"  # ✅ Correct reference
+        run: echo "${{ needs.build.outputs.script-file }}"
 
       - name: Deploy
         run: echo "Deploying..."
